@@ -16,6 +16,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SimplePdfScanner"
         tools:targetApi="31">
+        <provider
+            android:authorities="com.example.simplepdfscanner.fileprovider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider"/>
+        </provider>
         <activity
             android:name=".ImageCropActivity"
             android:exported="false">

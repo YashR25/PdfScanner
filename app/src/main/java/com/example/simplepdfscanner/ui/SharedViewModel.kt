@@ -1,8 +1,12 @@
 package com.example.simplepdfscanner.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,24 +23,8 @@ class SharedViewModel: ViewModel() {
 
     private val mutableImageList = mutableListOf<Bitmap>()
 
-    @SuppressLint("SimpleDateFormat")
-    @Throws(IOException::class)
-    fun createImageFile(): File {
-        // Create an image file name
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        val imageFileName = "JPEG_" + timeStamp + "_"
-        val storageDir = Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES
-        )
-        val image = File.createTempFile(
-            imageFileName, // prefix
-            ".jpg", // suffix
-            storageDir      // directory
-        )
-
-        // Save a file: path for use with ACTION_VIEW intents
-
-        return image
+    init {
+        Log.d("ViewModel","ViewModel Called")
     }
 
     fun addImage(image: Bitmap?) {
@@ -45,6 +33,18 @@ class SharedViewModel: ViewModel() {
             _imageList.value = mutableImageList
         }
 
+    }
+
+    fun getUri(data: Uri?, baseContext: Context): String? {
+        val filePathColumn = arrayOf( MediaStore.Images.Media.DATA)
+        val cursor = baseContext.contentResolver.query(data!!, filePathColumn,null,null,null)
+        cursor?.moveToFirst()
+        val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
+        val filePath = columnIndex?.let { cursor.getString(it) }
+        val file = filePath?.let { File(it) }
+        val fileName = file?.name
+        cursor?.close()
+        return filePath
     }
 
 }

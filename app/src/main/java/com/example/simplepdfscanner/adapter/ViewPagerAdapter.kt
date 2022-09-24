@@ -16,7 +16,7 @@ class ViewPagerAdapter(private val list: List<Bitmap>): RecyclerView.Adapter<Vie
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        binding = ViewPagerItemBinding.inflate(inflater)
+        binding = ViewPagerItemBinding.inflate(inflater,parent,false)
         return ViewHolder(binding)
     }
 
