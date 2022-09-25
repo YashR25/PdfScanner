@@ -25,6 +25,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
 import com.example.simplepdfscanner.ImageCropActivity
 import com.example.simplepdfscanner.adapter.ViewPagerAdapter
+import com.example.simplepdfscanner.data.PdfRepository
 import com.example.simplepdfscanner.databinding.FragmentCreatePdfBinding
 import com.example.simplepdfscanner.ui.SharedViewModel
 import com.example.simplepdfscanner.util.FileUtil
@@ -101,6 +102,10 @@ class CreatePdfFragment : Fragment() {
             binding.viewPager.adapter = ViewPagerAdapter(it)
         }
         askPermission()
+
+        binding.btnCreatePdf.setOnClickListener {
+
+        }
         return binding.root
     }
 
