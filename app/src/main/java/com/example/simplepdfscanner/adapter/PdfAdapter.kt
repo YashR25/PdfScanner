@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.simplepdfscanner.databinding.PdfItemBinding
 import com.example.simplepdfscanner.model.PdfModel
 
-class PdfAdapter: ListAdapter<PdfModel,PdfAdapter.ViewHolder>(DiffCallBack) {
+class PdfAdapter(val onItemClickListener: OnItemClickListener): ListAdapter<PdfModel,PdfAdapter.ViewHolder>(DiffCallBack) {
 
     lateinit var binding: PdfItemBinding
 
@@ -24,7 +24,12 @@ class PdfAdapter: ListAdapter<PdfModel,PdfAdapter.ViewHolder>(DiffCallBack) {
         val item = currentList[position]
         binding.pdfName.text = item.pdfName
         binding.pdfDesc.text = item.pdfDesc
+        holder.itemView.setOnClickListener{
+            onItemClickListener.onClick(position)
+        }
     }
+
+
 
     object DiffCallBack:DiffUtil.ItemCallback<PdfModel>(){
         override fun areItemsTheSame(oldItem: PdfModel, newItem: PdfModel): Boolean {
@@ -35,5 +40,11 @@ class PdfAdapter: ListAdapter<PdfModel,PdfAdapter.ViewHolder>(DiffCallBack) {
             return oldItem == newItem
         }
 
+    }
+}
+
+class OnItemClickListener(private val onItemClick: (Int) -> Unit){
+    fun onClick(position: Int){
+        onItemClick.invoke(position)
     }
 }

@@ -1,25 +1,29 @@
 package com.example.simplepdfscanner.ui
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.lifecycle.viewModelScope
+import com.example.simplepdfscanner.data.PdfRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SharedViewModel: ViewModel() {
+@HiltViewModel
+class SharedViewModel @Inject constructor(val repository: PdfRepository) : ViewModel() {
 
     private val _imageList: MutableLiveData<List<Bitmap>> = MutableLiveData()
     val imageList: LiveData<List<Bitmap>>
         get() = _imageList
+
+    private val _status:MutableLiveData<Status> = MutableLiveData()
+    val status: LiveData<Status>
+        get() = _status
+
+    var fileProvider:Uri? = null
 
     private val mutableImageList = mutableListOf<Bitmap>()
 
@@ -35,16 +39,29 @@ class SharedViewModel: ViewModel() {
 
     }
 
-    fun getUri(data: Uri?, baseContext: Context): String? {
-        val filePathColumn = arrayOf( MediaStore.Images.Media.DATA)
-        val cursor = baseContext.contentResolver.query(data!!, filePathColumn,null,null,null)
-        cursor?.moveToFirst()
-        val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
-        val filePath = columnIndex?.let { cursor.getString(it) }
-        val file = filePath?.let { File(it) }
-        val fileName = file?.name
-        cursor?.close()
-        return filePath
+    fun createPdf(){
+        viewModelScope.launch {
+            _status.value = Status.isLoading()
+            imageList.value?.let { repository.createPdf(it) }
+            _status.value = Status.Success()
+        }
     }
 
+//    fun getUri(data: Uri?, baseContext: Context): String? {
+//        val filePathColumn = arrayOf( MediaStore.Images.Media.DATA)
+//        val cursor = baseContext.contentResolver.query(data!!, filePathColumn,null,null,null)
+//        cursor?.moveToFirst()
+//        val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
+//        val filePath = columnIndex?.let { cursor.getString(it) }
+//        val file = filePath?.let { File(it) }
+//        val fileName = file?.name
+//        cursor?.close()
+//        return filePath
+//    }
+
+}
+
+sealed class Status{
+    data class isLoading(val message: String = "Loading") :Status()
+    data class Success(val message: String = "Successfully Created PDF...") :Status()
 }

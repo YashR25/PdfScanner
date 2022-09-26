@@ -17,22 +17,28 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.*
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.simplepdfscanner.ImageCropActivity
+import com.example.simplepdfscanner.R
 import com.example.simplepdfscanner.adapter.ViewPagerAdapter
 import com.example.simplepdfscanner.data.PdfRepository
 import com.example.simplepdfscanner.databinding.FragmentCreatePdfBinding
 import com.example.simplepdfscanner.ui.SharedViewModel
+import com.example.simplepdfscanner.ui.Status
 import com.example.simplepdfscanner.util.FileUtil
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.IOException
 
-
+@AndroidEntryPoint
 class CreatePdfFragment : Fragment() {
 
 
@@ -104,7 +110,20 @@ class CreatePdfFragment : Fragment() {
         askPermission()
 
         binding.btnCreatePdf.setOnClickListener {
+            viewModel.createPdf()
+        }
 
+        viewModel.status.observe(viewLifecycleOwner){
+            when(it){
+                is Status.Success -> {
+                    binding.progressBar.visibility = GONE
+                    Toast.makeText(requireContext(),it.message,Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_createPdfFragment_to_homeFragment)
+                }
+                is Status.isLoading ->{
+                    binding.progressBar.visibility = VISIBLE
+                }
+            }
         }
         return binding.root
     }

@@ -1,25 +1,33 @@
 package com.example.simplepdfscanner.data
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.pdf.PdfDocument
+import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import com.example.simplepdfscanner.model.PdfModel
+import com.example.simplepdfscanner.util.FileUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
-class PdfRepository {
+class PdfRepository @Inject constructor(private val dao: PdfDao, val context: Application){
 
-    fun createPdf(bitmapList: List<Bitmap>,context: Context){
+    suspend fun createPdf(bitmapList: List<Bitmap>){
 
+        withContext(Dispatchers.IO){
         val pdfDocument: PdfDocument = PdfDocument()
 
         for (bitmap in bitmapList){
@@ -45,6 +53,19 @@ class PdfRepository {
         val uri = file.absolutePath
         val outputStream = FileOutputStream(file)
         pdfDocument.writeTo(outputStream)
-        Log.d("Repository",uri)
+        val pdf = PdfModel(uri = uri, pdfName = pathName, pdfDesc = currentDateAndTime)
+            dao.insertPdf(pdf)
+            Log.d("Repository",uri)
+        }
     }
+
+     suspend fun getAllPdf(): Flow<List<PdfModel>> {
+         val list: Flow<kotlin.collections.List<PdfModel>>
+         withContext(Dispatchers.IO){
+             list = dao.getPdfList()
+         }
+         return list
+    }
+
+
 }

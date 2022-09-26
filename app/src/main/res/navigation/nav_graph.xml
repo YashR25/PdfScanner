@@ -7,9 +7,17 @@
     <fragment
         android:id="@+id/createPdfFragment"
         android:name="com.example.simplepdfscanner.ui.createPdfFragment.CreatePdfFragment"
-        android:label="CreatePdfFragment" />
+        android:label="CreatePdfFragment" >
+        <action
+            android:id="@+id/action_createPdfFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.simplepdfscanner.ui.homeFragment.HomeFragment"
-        android:label="HomeFragment" />
+        android:label="HomeFragment" >
+        <action
+            android:id="@+id/action_homeFragment_to_createPdfFragment"
+            app:destination="@id/createPdfFragment" />
+    </fragment>
 </navigation>
