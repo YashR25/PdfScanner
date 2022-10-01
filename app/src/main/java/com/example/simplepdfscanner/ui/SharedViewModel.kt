@@ -39,11 +39,22 @@ class SharedViewModel @Inject constructor(val repository: PdfRepository) : ViewM
 
     }
 
+    fun deleteImage(position: Int){
+        mutableImageList.removeAt(position)
+        _imageList.value = mutableImageList
+    }
+
     fun createPdf(){
         viewModelScope.launch {
             _status.value = Status.isLoading()
-            imageList.value?.let { repository.createPdf(it) }
-            _status.value = Status.Success()
+            if (imageList.value == null){
+                _status.value = Status.Error()
+            }
+            imageList.value?.let {
+                repository.createPdf(it)
+                _status.value = Status.Success()
+            }
+
         }
     }
 
@@ -64,4 +75,5 @@ class SharedViewModel @Inject constructor(val repository: PdfRepository) : ViewM
 sealed class Status{
     data class isLoading(val message: String = "Loading") :Status()
     data class Success(val message: String = "Successfully Created PDF...") :Status()
+    data class Error(val message: String = "There is No Image Selected....."): Status()
 }

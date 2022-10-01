@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/createPdfFragment">
+    app:startDestination="@id/homeFragment">
 
     <fragment
         android:id="@+id/createPdfFragment"
@@ -18,6 +18,22 @@
         android:label="HomeFragment" >
         <action
             android:id="@+id/action_homeFragment_to_createPdfFragment"
-            app:destination="@id/createPdfFragment" />
+            app:destination="@id/createPdfFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/fade_out"/>
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.simplepdfscanner.ui.settingFragment.SettingsFragment"
+        android:label="SettingsFragment">
+        <action
+            android:id="@+id/action_settingsFragment_to_createPdfFragment"
+            app:destination="@id/createPdfFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/fade_out"/>
     </fragment>
 </navigation>

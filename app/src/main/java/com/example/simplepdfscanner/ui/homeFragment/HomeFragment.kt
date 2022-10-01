@@ -7,11 +7,14 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.simplepdfscanner.R
 import com.example.simplepdfscanner.adapter.OnItemClickListener
@@ -48,12 +51,15 @@ class HomeFragment : Fragment() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         viewModel.pdfList.observe(viewLifecycleOwner){
-            list = it
-            adapter.submitList(it)
-        }
-
-        binding.startScan.setOnClickListener{
-            findNavController().navigate(R.id.action_homeFragment_to_createPdfFragment)
+            if (it.isEmpty() || it == null){
+                binding.txtEmpty.visibility = VISIBLE
+                binding.emptyImage.visibility = VISIBLE
+            }else{
+                binding.txtEmpty.visibility = GONE
+                binding.emptyImage.visibility = GONE
+                list = it
+                adapter.submitList(it)
+            }
         }
         return binding.root
     }

@@ -26,8 +26,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.CompositePageTransformer
+import androidx.viewpager2.widget.MarginPageTransformer
+import androidx.viewpager2.widget.ViewPager2
 import com.example.simplepdfscanner.ImageCropActivity
 import com.example.simplepdfscanner.R
+import com.example.simplepdfscanner.adapter.OnImageClick
 import com.example.simplepdfscanner.adapter.ViewPagerAdapter
 import com.example.simplepdfscanner.data.PdfRepository
 import com.example.simplepdfscanner.databinding.FragmentCreatePdfBinding
@@ -37,6 +42,7 @@ import com.example.simplepdfscanner.util.FileUtil
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.IOException
+import kotlin.math.abs
 
 @AndroidEntryPoint
 class CreatePdfFragment : Fragment() {
@@ -47,6 +53,7 @@ class CreatePdfFragment : Fragment() {
     lateinit var cameraLauncher:ActivityResultLauncher<Intent>
     lateinit var permissionLauncher:ActivityResultLauncher<Array<String>>
     lateinit var cropImageLauncher: ActivityResultLauncher<Intent>
+    var position = 0
 
     @SuppressLint("QueryPermissionsNeeded")
     override fun onCreateView(
@@ -55,6 +62,8 @@ class CreatePdfFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         binding = FragmentCreatePdfBinding.inflate(inflater)
+        binding.btnCreatePdf.isEnabled = false
+        binding.btnDeleteImage.isEnabled = false
         val viewModel:SharedViewModel by viewModels()
 
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){}
@@ -104,13 +113,49 @@ class CreatePdfFragment : Fragment() {
             val dialog = builder.create()
             dialog.show()
         }
+        binding.viewPager.apply {
+            clipToPadding = false
+            clipChildren = false
+            offscreenPageLimit = 3
+            getChildAt(0).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+
+            val compositePageTransformer = CompositePageTransformer()
+            compositePageTransformer.addTransformer(MarginPageTransformer(40))
+            compositePageTransformer.addTransformer(ViewPager2.PageTransformer { page, position ->
+                val r = 1 - abs(position)
+                page.scaleY = 0.85f + r * 0.15f
+            })
+
+            setPageTransformer(compositePageTransformer)
+        }
         viewModel.imageList.observe(viewLifecycleOwner){
-            binding.viewPager.adapter = ViewPagerAdapter(it)
+            it?.let {
+                binding.btnDeleteImage.isEnabled = true
+                binding.btnCreatePdf.isEnabled = true
+                binding.emptyImageTxt.visibility = GONE
+                binding.viewPager.adapter = ViewPagerAdapter(it, OnImageClick {imagePosition->
+                    position = imagePosition
+                })
+            }
         }
         askPermission()
 
         binding.btnCreatePdf.setOnClickListener {
             viewModel.createPdf()
+        }
+        binding.btnDeleteImage.setOnClickListener {
+            val builder= AlertDialog.Builder(requireContext())
+                .setTitle("Delete!!")
+                .setMessage("Are you Sure you want to delete Image?")
+                .setPositiveButton("Yes"){dialog,_->
+                    dialog.dismiss()
+                    viewModel.deleteImage(position)
+                }
+                .setNegativeButton("No"){dialog,_->
+                    dialog.dismiss()
+                }
+            val dialog = builder.create()
+            dialog.show()
         }
 
         viewModel.status.observe(viewLifecycleOwner){
@@ -122,6 +167,10 @@ class CreatePdfFragment : Fragment() {
                 }
                 is Status.isLoading ->{
                     binding.progressBar.visibility = VISIBLE
+                }
+                is Status.Error -> {
+                    binding.progressBar.visibility = GONE
+                    Toast.makeText(requireContext(),it.message,Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.simplepdfscanner.databinding.ViewPagerItemBinding
 
-class ViewPagerAdapter(private val list: List<Bitmap>): RecyclerView.Adapter<ViewPagerAdapter.ViewHolder>() {
+class ViewPagerAdapter(private val list: List<Bitmap>,val onImageClick:OnImageClick): RecyclerView.Adapter<ViewPagerAdapter.ViewHolder>() {
 
     lateinit var binding: ViewPagerItemBinding
 
@@ -23,9 +23,18 @@ class ViewPagerAdapter(private val list: List<Bitmap>): RecyclerView.Adapter<Vie
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val bitmap = list[position]
         binding.imageItem.setImageBitmap(bitmap)
+        holder.itemView.setOnClickListener {
+            onImageClick.onImageClick(position)
+        }
     }
 
     override fun getItemCount(): Int {
         return list.size
+    }
+}
+
+class OnImageClick(private val onClick: (Int) -> Unit){
+    fun onImageClick(position: Int){
+        onClick.invoke(position)
     }
 }

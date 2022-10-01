@@ -11,11 +11,15 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import com.example.simplepdfscanner.databinding.ActivityImageCropBinding
+import com.example.simplepdfscanner.util.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,6 +66,32 @@ class ImageCropActivity : AppCompatActivity() {
                 setResult(RESULT_OK,resultIntent)
                 finish()
             }
+        }
+
+        binding.btnGrayScale.setOnClickListener {
+            binding.progressBar.visibility = VISIBLE
+            lifecycleScope.launch{
+                if (bitmap != null) {
+                    val grayScaledBitmap = FileUtil.toGrayScale(bitmap)
+                    binding.documentScanner.setImage(grayScaledBitmap)
+                    binding.progressBar.visibility = GONE
+                }
+            }
+        }
+
+        binding.btnWhiteBoard.setOnClickListener {
+            binding.progressBar.visibility = VISIBLE
+            lifecycleScope.launch{
+                if (bitmap != null) {
+                    val whiteBoardBitmap = FileUtil.bitmapToWhiteBoard2(bitmap)
+                    binding.documentScanner.setImage(whiteBoardBitmap)
+                    binding.progressBar.visibility = GONE
+                }
+            }
+        }
+
+        binding.btnCancel.setOnClickListener {
+            this.onBackPressed()
         }
     }
     @RequiresApi(Build.VERSION_CODES.P)
